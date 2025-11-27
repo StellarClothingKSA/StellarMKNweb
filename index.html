@@ -187,19 +187,20 @@
 
         .logo { display: flex; align-items: center; gap: 10px; }
 
+        /* updated logo: horizontal, no circle crop */
         .logo img {
-            width: 46px;
             height: 46px;
-            border-radius: 50%;
-            border: 2px solid #a855ff;
+            width: auto;
+            border-radius: 8px;
+            border: none;
             box-shadow: 0 0 14px #a855ff;
-            object-fit: cover;
+            object-fit: contain;
             animation: logoGlow 2.5s infinite ease-in-out;
         }
 
         @keyframes logoGlow {
             0%,100% { box-shadow: 0 0 14px #a855ff; transform: scale(1); }
-            50% { box-shadow: 0 0 26px #a855ff; transform: scale(1.05); }
+            50% { box-shadow: 0 0 26px #a855ff; transform: scale(1.02); }
         }
 
         .logo-title span:first-child {
@@ -284,23 +285,13 @@
             box-shadow: none;
         }
 
-        /* ============================================================
-           SOLD OUT BADGE
-        ============================================================ */
-        .sold-out {
-            position: absolute;
-            top: 14px;
-            left: -38px;
-            background: red;
-            padding: 6px 42px;
-            color: white;
-            font-weight: bold;
-            transform: rotate(-45deg);
-            font-size: 14px;
-            z-index: 20;
-            text-transform: uppercase;
-            box-shadow: 0 0 10px red;
+        .small-note {
+            font-size: 0.8rem;
+            color: #ccc;
+            margin-top: 4px;
         }
+
+        .hidden { display: none !important; }
 
         /* ============================================================
            HERO / HOME SECTION
@@ -501,6 +492,23 @@
             transform: translateY(-6px) scale(1.02);
         }
 
+        /* Coming soon placeholder */
+        .coming-soon-box {
+            width: 100%;
+            height: 190px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #4b5563, #6b7280);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #e5e7eb;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 14px rgba(0,0,0,0.6);
+        }
+
         /* ============================================================
            CART
         ============================================================ */
@@ -567,14 +575,6 @@
             width: 250px;
             max-width: 100%;
         }
-
-        .small-note {
-            font-size: 0.8rem;
-            color: #ccc;
-            margin-top: 4px;
-        }
-
-        .hidden { display: none !important; }
 
         /* ============================================================
            PRODUCT DETAIL SECTION
@@ -960,38 +960,35 @@
         <div class="products-grid">
 
             <!-- Pants (Available) -->
-            <article class="product" data-name="Stellar Pants" data-price="150" id="p1">
+            <article class="product" data-name="Stellar Pants" data-price="150" id="p1" data-available="true">
                 <img src="images/pants.png" alt="Stellar Pants">
                 <h3>Stellar Pants</h3>
                 <p>150 SAR</p>
                 <button type="button" class="btn btn-primary" onclick="addToCart('Stellar Pants',150,event)">Add to Cart</button>
             </article>
 
-            <!-- Hoodie SOLD OUT -->
-            <article class="product" data-name="Stellar Hoodie" data-price="200" id="p2">
-                <div class="sold-out">Sold Out</div>
-                <img src="images/Hoodie.png" alt="Stellar Hoodie">
+            <!-- Hoodie COMING SOON -->
+            <article class="product" data-name="Stellar Hoodie" data-price="200" id="p2" data-available="false">
+                <div class="coming-soon-box">Coming soon...</div>
                 <h3>Stellar Hoodie</h3>
                 <p>200 SAR</p>
-                <button type="button" class="btn btn-primary btn-disabled" disabled onclick="event.stopPropagation()">Unavailable</button>
+                <button type="button" class="btn btn-primary btn-disabled" disabled onclick="event.stopPropagation()">Coming Soon</button>
             </article>
 
-            <!-- Cap SOLD OUT -->
-            <article class="product" data-name="Stellar Cap" data-price="80" id="p3">
-                <div class="sold-out">Sold Out</div>
-                <img src="images/Hat.png" alt="Stellar Cap">
+            <!-- Cap COMING SOON -->
+            <article class="product" data-name="Stellar Cap" data-price="80" id="p3" data-available="false">
+                <div class="coming-soon-box">Coming soon...</div>
                 <h3>Stellar Cap</h3>
                 <p>80 SAR</p>
-                <button type="button" class="btn btn-primary btn-disabled" disabled onclick="event.stopPropagation()">Unavailable</button>
+                <button type="button" class="btn btn-primary btn-disabled" disabled onclick="event.stopPropagation()">Coming Soon</button>
             </article>
 
-            <!-- T-Shirt SOLD OUT -->
-            <article class="product" data-name="Stellar T-Shirt" data-price="120" id="p4">
-                <div class="sold-out">Sold Out</div>
-                <img src="images/Shirt.png" alt="Stellar T-Shirt">
+            <!-- T-Shirt COMING SOON -->
+            <article class="product" data-name="Stellar T-Shirt" data-price="120" id="p4" data-available="false">
+                <div class="coming-soon-box">Coming soon...</div>
                 <h3>Stellar T-Shirt</h3>
                 <p>120 SAR</p>
-                <button type="button" class="btn btn-primary btn-disabled" disabled onclick="event.stopPropagation()">Unavailable</button>
+                <button type="button" class="btn btn-primary btn-disabled" disabled onclick="event.stopPropagation()">Coming Soon</button>
             </article>
 
         </div>
@@ -1277,14 +1274,22 @@
                 li.className = "search-result-item";
                 li.onclick = () => prod.scrollIntoView({ behavior: "smooth", block: "center" });
 
-                const img = prod.querySelector("img").cloneNode();
-                img.className = "search-result-thumb";
+                const img = prod.querySelector("img");
+                if (img) {
+                    const clone = img.cloneNode();
+                    clone.className = "search-result-thumb";
+                    li.appendChild(clone);
+                }
 
                 const text = document.createElement("div");
                 text.innerHTML = `<strong>${prod.dataset.name}</strong>`;
 
-                li.appendChild(img);
-                li.appendChild(text);
+                if (!img) {
+                    // if no image (coming soon), just text
+                    li.appendChild(text);
+                } else {
+                    li.appendChild(text);
+                }
                 list.appendChild(li);
             }
         });
@@ -1388,31 +1393,8 @@
             fit: "Relaxed, slightly tapered fit designed for all-day comfort.",
             material: "100% cotton, mid-weight, breathable and soft on skin.",
             wash: "Machine wash cold with similar colours. Do not bleach. Tumble dry low or hang to dry. Iron inside out."
-        },
-        p2: {
-            name: "Stellar Hoodie",
-            price: 200,
-            img: "images/Hoodie.png",
-            fit: "Regular fit hoodie with enough room for layering.",
-            material: "100% cotton fleece, soft and warm for cooler days.",
-            wash: "Turn inside out, machine wash cold, gentle cycle. Do not iron the print."
-        },
-        p3: {
-            name: "Stellar Cap",
-            price: 80,
-            img: "images/Hat.png",
-            fit: "Adjustable strap to fit most head sizes.",
-            material: "Cotton twill with structured front panel.",
-            wash: "Spot clean with a damp cloth. Do not machine wash."
-        },
-        p4: {
-            name: "Stellar T-Shirt",
-            price: 120,
-            img: "images/Shirt.png",
-            fit: "Regular fit tee with a slightly relaxed silhouette.",
-            material: "100% cotton, lightweight and breathable.",
-            wash: "Machine wash cold, gentle cycle. Do not bleach. Tumble dry low."
         }
+        // p2,p3,p4 are coming soon & disabled, so no detail data needed
     };
 
     let currentDetailId = null;
@@ -1420,7 +1402,7 @@
 
     function openProductDetail(productId) {
         const data = productData[productId];
-        if (!data) return;
+        if (!data) return; // ignore coming soon items
 
         currentDetailId = productId;
         currentDetailSize = null;
@@ -1466,11 +1448,14 @@
         });
     });
 
+    // Only make products with data-available="true" open detail
     document.querySelectorAll(".product").forEach(prod => {
-        prod.addEventListener("click", () => {
-            const id = prod.id;
-            openProductDetail(id);
-        });
+        if (prod.dataset.available === "true") {
+            prod.addEventListener("click", () => {
+                const id = prod.id;
+                openProductDetail(id);
+            });
+        }
     });
 </script>
 
