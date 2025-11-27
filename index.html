@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stellar MKN Store</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+
+        /* ============================================================
+           GLOBAL STYLES
+        ============================================================ */
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: radial-gradient(circle at top, #111 0, #000 55%);
+            color: #fdfdfd;
+            overflow-x: hidden;
+        }
+
+        /* ============================================================
+           STARFIELD BACKGROUND
+        ============================================================ */
+        .starfield,
+        .starfield::before,
+        .starfield::after {
+            position: fixed;
+            top: 0; left: 0;
+            width: 200%;
+            height: 200%;
+            pointer-events: none;
+        }
+
+        .starfield {
+            z-index: 0;
+            background-image:
+                    radial-gradient(1px 1px at 20px 30px, #fff, transparent),
+                    radial-gradient(1px 1px at 80px 120px, #fff, transparent),
+                    radial-gradient(1px 1px at 150px 220px, #fff, transparent),
+                    radial-gradient(2px 2px at 40px 80px, #fff, transparent),
+                    radial-gradient(2px 2px at 200px 200px, #fff, transparent);
+            background-size: 200px 200px;
+            animation: starMove 100s linear infinite;
+        }
+
+        .starfield::before {
+            content: "";
+            background-image:
+                    radial-gradient(1px 1px at 60px 40px, rgba(255,255,255,0.6), transparent),
+                    radial-gradient(1px 1px at 200px 100px, rgba(255,255,255,0.6), transparent);
+            background-size: 220px 220px;
+            animation: starMove 140s linear infinite reverse;
+        }
+
+        .starfield::after {
+            content: "";
+            background-image:
+                    radial-gradient(1px 1px at 100px 60px, rgba(255,255,255,0.5), transparent),
+                    radial-gradient(1px 1px at 250px 200px, rgba(255,255,255,0.5), transparent);
+            background-size: 260px 260px;
+            animation: starMove 180s linear infinite;
+        }
+
+        @keyframes starMove {
+            from { transform: translate3d(0,0,0); }
+            to   { transform: translate3d(-20%, -20%, 0); }
+        }
+
+        /* ============================================================
+           SHOOTING STARS (BEHIND CONTENT)
+        ============================================================ */
+        .shooting-star-container {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1; /* behind header/main/cart, above background */
+        }
+
+        .shooting-star {
+            position: fixed;
+            height: 2px;
+            background: linear-gradient(90deg, white, transparent);
+            border-radius: 999px;
+            opacity: 0;
+            transform-origin: left;
+            filter: drop-shadow(0 0 6px white);
+            animation: shoot linear forwards;
+        }
+
+        @keyframes shoot {
+            from { opacity: 1; transform: translate3d(0,0,0); }
+            to   { opacity: 0; transform: translate3d(-500px,250px,0); }
+        }
+
+        /* ============================================================
+           HEADER
+        ============================================================ */
+        header {
+            position: relative;
+            z-index: 5; /* above stars */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 22px;
+            background: rgba(0,0,0,0.7);
+            border-bottom: 1px solid rgba(150,100,255,0.4);
+            backdrop-filter: blur(6px);
+        }
+
+        .logo { display: flex; align-items: center; gap: 10px; }
+
+        .logo img {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            border: 2px solid #a855ff;
+            box-shadow: 0 0 14px #a855ff;
+            object-fit: cover; /* keeps circle, crops outside */
+        }
+
+        .logo-title span:first-child {
+            font-size: 1.2rem;
+            font-weight: bold;
+            background: linear-gradient(90deg,#a855ff,#38bdf8,#f97316);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo-title span:last-child {
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            color: #bbb;
+        }
+
+        #searchBar {
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid #7c7c7c;
+            background: rgba(15,23,42,0.9);
+            color: white;
+            width: 180px;
+        }
+
+        /* ============================================================
+           BUTTONS
+        ============================================================ */
+        .btn {
+            padding: 8px 16px;
+            font-weight: bold;
+            border-radius: 999px;
+            cursor: pointer;
+            border: none;
+            transition: 0.15s;
+        }
+
+        .btn-primary {
+            background: #a855ff;
+            color: white;
+            box-shadow: 0 0 10px #a855ff;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 18px #a855ff;
+        }
+
+        .btn-secondary {
+            background: rgba(20,20,30,0.9);
+            border: 1px solid #888;
+            color: white;
+        }
+        .btn-secondary:hover {
+            box-shadow: 0 0 10px #38bdf8;
+            border-color: #38bdf8;
+        }
+
+        .btn-danger {
+            background: #e53935;
+            color: white;
+            box-shadow: 0 0 8px red;
+        }
+        .btn-danger:hover {
+            box-shadow: 0 0 14px red;
+        }
+
+        .btn-disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* ============================================================
+           SOLD OUT BADGE
+        ============================================================ */
+        .sold-out {
+            position: absolute;
+            top: 14px;
+            left: -38px;
+            background: red;
+            padding: 6px 42px;
+            color: white;
+            font-weight: bold;
+            transform: rotate(-45deg);
+            font-size: 14px;
+            z-index: 20;
+            text-transform: uppercase;
+            box-shadow: 0 0 10px red;
+        }
+
+        /* ============================================================
+           SEARCH + GRID LAYOUT
+        ============================================================ */
+        main {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            position: relative;
+            z-index: 5; /* above stars */
+        }
+
+        .store-layout { display: flex; gap: 20px; }
+
+        .search-panel {
+            width: 260px;
+            background: rgba(15,15,30,0.9);
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid #777;
+        }
+
+        .search-results-list { list-style: none; padding: 0; margin: 0; }
+
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .search-result-item:hover {
+            background: rgba(255,255,255,0.1);
+            box-shadow: 0 0 10px #38bdf8;
+        }
+
+        .search-result-thumb {
+            width: 40px; height: 40px; border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .products-grid {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 20px;
+        }
+
+        .product {
+            position: relative;
+            background: rgba(20,20,35,0.9);
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid #666;
+            box-shadow: 0 0 14px rgba(100,100,255,0.5);
+            text-align: center;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+
+        .product:hover {
+            transform: translateY(-4px);
+            border-color: #a855ff;
+            box-shadow: 0 0 22px rgba(168,85,255,0.8);
+        }
+
+        .product img {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 0 14px rgba(0,0,0,0.6);
+        }
+
+        /* Highlight when matched by search */
+        .product-highlight {
+            border-color: #38bdf8;
+            box-shadow: 0 0 28px rgba(56,189,248,0.95);
+            transform: translateY(-6px) scale(1.02);
+        }
+
+        /* ============================================================
+           CART
+        ============================================================ */
+        #cartSection {
+            background: rgba(20,20,40,0.9);
+            padding: 20px;
+            margin: 20px auto;
+            border-radius: 16px;
+            border: 1px solid #888;
+            max-width: 1200px;
+            display: none;
+            position: relative;
+            z-index: 5; /* above stars */
+        }
+
+        #cartItems {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 12px 0;
+        }
+
+        #cartItems li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 10px;
+            margin-bottom: 6px;
+            background: rgba(15,15,30,0.9);
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        .delivery-options {
+            margin: 10px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .delivery-options label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+        }
+
+        #deliveryAddressGroup {
+            margin-top: 8px;
+        }
+
+        #deliveryAddress {
+            margin-top: 4px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 1px solid #777;
+            background: rgba(15,23,42,0.9);
+            color: #fdfdfd;
+            width: 250px;
+            max-width: 100%;
+        }
+
+        .small-note {
+            font-size: 0.8rem;
+            color: #ccc;
+            margin-top: 4px;
+        }
+
+        .hidden { display: none !important; }
+
+        /* ============================================================
+           CONTACT SECTION
+        ============================================================ */
+        #contactSection {
+            max-width: 1200px;
+            margin: 0 auto 40px auto;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid #4b5563;
+            background: rgba(15,15,30,0.95);
+            position: relative;
+            z-index: 5;
+        }
+
+        #contactSection h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        #contactSection p {
+            margin: 4px 0;
+        }
+
+        #contactSection a {
+            color: #38bdf8;
+            text-decoration: none;
+        }
+
+        #contactSection a:hover {
+            text-decoration: underline;
+        }
+
+        #contactSection ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 8px 0 0 0;
+        }
+
+        #contactSection li {
+            margin-bottom: 4px;
+        }
+
+        /* ============================================================
+           MOBILE LAYOUT
+        ============================================================ */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .store-layout {
+                flex-direction: column;
+            }
+
+            .search-panel {
+                width: 100%;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="starfield"></div>
+<div class="shooting-star-container" id="shootingStarContainer"></div>
+
+<!-- Header -->
+<header>
+    <div class="logo">
+        <img src="images/logo.png" alt="Stellar MKN Logo">
+        <div class="logo-title">
+            <span>Stellar MKN</span>
+            <span>Space Apparel Shop</span>
+        </div>
+    </div>
+
+    <div>
+        <input id="searchBar" placeholder="Search..." aria-label="Search products">
+        <button type="button" class="btn btn-secondary" onclick="searchProducts()" aria-label="Search button">Search</button>
+        <button type="button" class="btn btn-secondary" onclick="showContact()">Contact Us</button>
+        <button type="button" class="btn btn-primary" onclick="toggleCart()" aria-label="Open cart">
+            🛒 Cart (<span id="cartCount">0</span>)
+        </button>
+    </div>
+</header>
+
+<!-- Cart -->
+<section id="cartSection">
+    <h2>Your Cart</h2>
+    <ul id="cartItems"></ul>
+
+    <!-- Delivery / Pickup section -->
+    <div class="delivery-options">
+        <span style="font-weight:bold;">Order type:</span>
+        <label>
+            <input type="radio" name="deliveryOption" value="pickup" checked onchange="updateDeliveryOption()">
+            Pick up
+        </label>
+        <label>
+            <input type="radio" name="deliveryOption" value="delivery" onchange="updateDeliveryOption()">
+            Delivery
+        </label>
+    </div>
+
+    <div id="pickupInfo" class="small-note">
+        G-1657 is the pick up location. Pick up after 2 days.
+    </div>
+
+    <div id="deliveryAddressGroup" class="hidden">
+        <label for="deliveryAddress" class="small-note">
+            Please enter your house / building number for delivery:
+        </label><br>
+        <input id="deliveryAddress" type="text" placeholder="House / Building number">
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-top:12px;">
+        <div class="cart-total">Total: <span id="cartTotal">0</span> SAR</div>
+        <div style="display:flex; gap:8px;">
+            <button type="button" class="btn btn-danger" onclick="clearCart()">Clear Cart</button>
+            <button type="button" class="btn btn-primary" onclick="emailCart()">Email Cart</button>
+        </div>
+    </div>
+</section>
+
+<!-- Main -->
+<main>
+    <div class="store-layout">
+
+        <!-- SEARCH SIDEBAR -->
+        <aside id="searchPanel" class="search-panel hidden">
+            <h3>Search Results</h3>
+            <ul id="searchResultsList" class="search-results-list"></ul>
+        </aside>
+
+        <!-- PRODUCTS GRID -->
+        <div class="products-grid">
+
+            <!-- Pants (Available) -->
+            <article class="product" data-name="Stellar Pants" data-price="150" id="p1">
+                <img src="images/pants.png" alt="Stellar Pants">
+                <h3>Stellar Pants</h3>
+                <p>150 SAR</p>
+                <button type="button" class="btn btn-primary" onclick="addToCart('Stellar Pants',150)">Add to Cart</button>
+            </article>
+
+            <!-- Hoodie SOLD OUT -->
+            <article class="product" data-name="Stellar Hoodie" data-price="200" id="p2">
+                <div class="sold-out">Sold Out</div>
+                <img src="images/Hoodie.png" alt="Stellar Hoodie">
+                <h3>Stellar Hoodie</h3>
+                <p>200 SAR</p>
+                <button type="button" class="btn btn-primary btn-disabled" disabled>Unavailable</button>
+            </article>
+
+            <!-- Cap SOLD OUT -->
+            <article class="product" data-name="Stellar Cap" data-price="80" id="p3">
+                <div class="sold-out">Sold Out</div>
+                <img src="images/Hat.png" alt="Stellar Cap">
+                <h3>Stellar Cap</h3>
+                <p>80 SAR</p>
+                <button type="button" class="btn btn-primary btn-disabled" disabled>Unavailable</button>
+            </article>
+
+            <!-- T-Shirt SOLD OUT -->
+            <article class="product" data-name="Stellar T-Shirt" data-price="120" id="p4">
+                <div class="sold-out">Sold Out</div>
+                <img src="images/Shirt.png" alt="Stellar T-Shirt">
+                <h3>Stellar T-Shirt</h3>
+                <p>120 SAR</p>
+                <button type="button" class="btn btn-primary btn-disabled" disabled>Unavailable</button>
+            </article>
+
+        </div>
+    </div>
+</main>
+
+<!-- CONTACT SECTION -->
+<section id="contactSection">
+    <h2>Contact Us</h2>
+    <p>We’d love to hear from you about Stellar MKN.</p>
+    <p>
+        <strong>Instagram:</strong>
+        <a href="https://www.instagram.com/stellarmkn?igsh=dDAzNGZyZTJrODIy" target="_blank" rel="noopener">
+            @stellarmkn
+        </a>
+    </p>
+    <p><strong>Phone numbers (WhatsApp / Call):</strong></p>
+    <ul>
+        <li><a href="tel:+966543424472">+966 543 424 472</a></li>
+        <li><a href="tel:+966564476409">+966 564 476 409</a></li>
+        <li><a href="tel:+966569889261">+966 569 889 261</a></li>
+    </ul>
+</section>
+
+<script>
+
+    /* ============================================================
+       CART LOGIC
+    ============================================================ */
+    let cart = [];
+
+    function updateCart() {
+        const cartItems = document.getElementById("cartItems");
+        const cartCount = document.getElementById("cartCount");
+        const cartTotal = document.getElementById("cartTotal");
+
+        cartItems.innerHTML = "";
+        let total = 0;
+
+        cart.forEach((item, i) => {
+            total += item.price;
+            const li = document.createElement("li");
+            li.innerHTML = `
+                <span>${item.name} - ${item.price} SAR</span>
+                <button type="button" class="btn btn-danger" onclick="removeFromCart(${i})">X</button>
+            `;
+            cartItems.appendChild(li);
+        });
+
+        cartCount.textContent = cart.length;
+        cartTotal.textContent = total.toFixed(2);
+    }
+
+    function addToCart(name, price) {
+        cart.push({name, price});
+        updateCart();
+    }
+
+    function removeFromCart(i) {
+        cart.splice(i,1);
+        updateCart();
+    }
+
+    function clearCart() {
+        cart = [];
+        updateCart();
+    }
+
+    /* ============================================================
+       DELIVERY / PICKUP LOGIC
+    ============================================================ */
+    function getSelectedDeliveryOption() {
+        const radios = document.querySelectorAll('input[name="deliveryOption"]');
+        for (const r of radios) {
+            if (r.checked) return r.value;
+        }
+        return "pickup";
+    }
+
+    function updateDeliveryOption() {
+        const option = getSelectedDeliveryOption();
+        const pickupInfo = document.getElementById("pickupInfo");
+        const deliveryGroup = document.getElementById("deliveryAddressGroup");
+
+        if (option === "pickup") {
+            pickupInfo.classList.remove("hidden");
+            deliveryGroup.classList.add("hidden");
+        } else {
+            pickupInfo.classList.add("hidden");
+            deliveryGroup.classList.remove("hidden");
+        }
+    }
+
+    /* ============================================================
+       CART SHOW/HIDE
+    ============================================================ */
+    function toggleCart() {
+        const cartSec = document.getElementById("cartSection");
+        cartSec.style.display = (cartSec.style.display === "block") ? "none" : "block";
+    }
+
+    /* ============================================================
+       CONTACT BUTTON
+    ============================================================ */
+    function showContact() {
+        const contact = document.getElementById("contactSection");
+        if (contact) {
+            contact.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+    }
+
+    /* ============================================================
+       SEARCH LOGIC
+    ============================================================ */
+    function searchProducts() {
+        const q = document.getElementById("searchBar").value.toLowerCase();
+        const panel = document.getElementById("searchPanel");
+        const list = document.getElementById("searchResultsList");
+
+        list.innerHTML = "";
+
+        // remove previous highlights
+        document.querySelectorAll(".product").forEach(prod => {
+            prod.classList.remove("product-highlight");
+        });
+
+        if (q.trim() === "") {
+            panel.classList.add("hidden");
+            return;
+        }
+
+        panel.classList.remove("hidden");
+
+        let foundAny = false;
+
+        document.querySelectorAll(".product").forEach(prod => {
+            const name = prod.dataset.name.toLowerCase();
+
+            if (name.includes(q)) {
+                foundAny = true;
+
+                // highlight the matching product card
+                prod.classList.add("product-highlight");
+
+                const li = document.createElement("li");
+                li.className = "search-result-item";
+                li.onclick = () => prod.scrollIntoView({ behavior: "smooth", block: "center" });
+
+                const img = prod.querySelector("img").cloneNode();
+                img.className = "search-result-thumb";
+
+                const text = document.createElement("div");
+                text.innerHTML = `<strong>${prod.dataset.name}</strong>`;
+
+                li.appendChild(img);
+                li.appendChild(text);
+                list.appendChild(li);
+            }
+        });
+
+        if (!foundAny) {
+            const li = document.createElement("li");
+            li.textContent = "No items found.";
+            list.appendChild(li);
+        }
+    }
+
+    // Allow pressing Enter in the search bar to trigger search
+    document.getElementById("searchBar").addEventListener("keydown", function (e) {
+        if (e.key === "Enter") {
+            searchProducts();
+        }
+    });
+
+    /* ============================================================
+       EMAIL CART (MAILTO)
+    ============================================================ */
+    function emailCart() {
+        if (cart.length === 0) {
+            alert("Your cart is empty. Add items before emailing.");
+            return;
+        }
+
+        const storeEmail = "stellarclothingksa@gmail.com";
+
+        // Compute total again
+        let total = 0;
+        cart.forEach(item => total += item.price);
+
+        const option = getSelectedDeliveryOption();
+        const addressInput = document.getElementById("deliveryAddress");
+        let deliveryInfo = "";
+
+        if (option === "pickup") {
+            deliveryInfo = "Pickup: G-1657 (pick up after 2 days).";
+        } else {
+            const addr = addressInput.value.trim();
+            if (!addr) {
+                alert("Please enter your house / building number for delivery.");
+                addressInput.focus();
+                return;
+            }
+            deliveryInfo = "Delivery to house / building number: " + addr;
+        }
+
+        const lines = [];
+        lines.push("New order from Stellar MKN website");
+        lines.push("");
+        cart.forEach((item, idx) => {
+            lines.push((idx + 1) + ". " + item.name + " - " + item.price + " SAR");
+        });
+        lines.push("");
+        lines.push("Total: " + total.toFixed(2) + " SAR");
+        lines.push("");
+        lines.push("Order type:");
+        lines.push(deliveryInfo);
+
+        const subject = encodeURIComponent("New Stellar MKN Order");
+        const body = encodeURIComponent(lines.join("\n"));
+
+        window.location.href = "mailto:" + storeEmail + "?subject=" + subject + "&body=" + body;
+    }
+
+    /* ============================================================
+       SHOOTING STARS
+    ============================================================ */
+    function random(min,max){ return Math.random()*(max-min)+min; }
+
+    function createShootingStar() {
+        const cont = document.getElementById("shootingStarContainer");
+        const star = document.createElement("div");
+        star.className = "shooting-star";
+
+        star.style.left = random(window.innerWidth * 0.2, window.innerWidth) + "px";
+        star.style.top = random(-80, window.innerHeight * 0.5) + "px";
+        star.style.width = random(120, 260) + "px";
+        star.style.animationDuration = random(0.8, 1.6) + "s";
+
+        cont.appendChild(star);
+        setTimeout(() => star.remove(), 2000);
+    }
+
+    (function loop(){
+        // create 1–3 shooting stars each cycle for a busier sky
+        const count = Math.floor(random(1, 3.9));
+        for (let i = 0; i < count; i++) {
+            createShootingStar();
+        }
+        setTimeout(loop, random(250, 900));
+    })();
+
+</script>
+
+</body>
+</html>
