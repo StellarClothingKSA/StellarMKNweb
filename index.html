@@ -116,7 +116,7 @@
             border-radius: 50%;
             border: 2px solid #a855ff;
             box-shadow: 0 0 14px #a855ff;
-            object-fit: cover;
+            object-fit: cover; /* keeps circle, crops outside */
         }
 
         .logo-title span:first-child {
@@ -357,6 +357,48 @@
         .hidden { display: none !important; }
 
         /* ============================================================
+           CONTACT SECTION
+        ============================================================ */
+        #contactSection {
+            max-width: 1200px;
+            margin: 0 auto 40px auto;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid #4b5563;
+            background: rgba(15,15,30,0.95);
+            position: relative;
+            z-index: 5;
+        }
+
+        #contactSection h2 {
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        #contactSection p {
+            margin: 4px 0;
+        }
+
+        #contactSection a {
+            color: #38bdf8;
+            text-decoration: none;
+        }
+
+        #contactSection a:hover {
+            text-decoration: underline;
+        }
+
+        #contactSection ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 8px 0 0 0;
+        }
+
+        #contactSection li {
+            margin-bottom: 4px;
+        }
+
+        /* ============================================================
            MOBILE LAYOUT
         ============================================================ */
         @media (max-width: 768px) {
@@ -396,6 +438,7 @@
     <div>
         <input id="searchBar" placeholder="Search..." aria-label="Search products">
         <button type="button" class="btn btn-secondary" onclick="searchProducts()" aria-label="Search button">Search</button>
+        <button type="button" class="btn btn-secondary" onclick="showContact()">Contact Us</button>
         <button type="button" class="btn btn-primary" onclick="toggleCart()" aria-label="Open cart">
             🛒 Cart (<span id="cartCount">0</span>)
         </button>
@@ -492,6 +535,24 @@
     </div>
 </main>
 
+<!-- CONTACT SECTION -->
+<section id="contactSection">
+    <h2>Contact Us</h2>
+    <p>We’d love to hear from you about Stellar MKN.</p>
+    <p>
+        <strong>Instagram:</strong>
+        <a href="https://www.instagram.com/stellarmkn?igsh=dDAzNGZyZTJrODIy" target="_blank" rel="noopener">
+            @stellarmkn
+        </a>
+    </p>
+    <p><strong>Phone numbers (WhatsApp / Call):</strong></p>
+    <ul>
+        <li><a href="tel:+966543424472">+966 543 424 472</a></li>
+        <li><a href="tel:+966564476409">+966 564 476 409</a></li>
+        <li><a href="tel:+966569889261">+966 569 889 261</a></li>
+    </ul>
+</section>
+
 <script>
 
     /* ============================================================
@@ -567,6 +628,16 @@
     function toggleCart() {
         const cartSec = document.getElementById("cartSection");
         cartSec.style.display = (cartSec.style.display === "block") ? "none" : "block";
+    }
+
+    /* ============================================================
+       CONTACT BUTTON
+    ============================================================ */
+    function showContact() {
+        const contact = document.getElementById("contactSection");
+        if (contact) {
+            contact.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
     }
 
     /* ============================================================
