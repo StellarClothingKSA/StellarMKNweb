@@ -509,6 +509,33 @@
             box-shadow: 0 0 14px rgba(0,0,0,0.6);
         }
 
+        /* Pants discount styling */
+        .old-price {
+            text-decoration: line-through;
+            color: #9ca3af;
+            margin-right: 6px;
+            font-size: 0.9rem;
+        }
+
+        .discount-text {
+            color: #f97373;
+            font-weight: 700;
+            margin-right: 6px;
+            font-size: 0.85rem;
+        }
+
+        .new-price {
+            font-weight: 700;
+            color: #fbbf24;
+        }
+
+        .preorder-tag {
+            font-size: 0.85rem;
+            color: #f97316;
+            margin-top: -6px;
+            margin-bottom: 8px;
+        }
+
         /* ============================================================
            CART
         ============================================================ */
@@ -959,12 +986,17 @@
         <!-- PRODUCTS GRID -->
         <div class="products-grid">
 
-            <!-- Pants (Available) -->
-            <article class="product" data-name="Stellar Pants" data-price="150" id="p1" data-available="true">
+            <!-- Pants (Available with discount & preorders) -->
+            <article class="product" data-name="Stellar Pants" data-price="120" id="p1" data-available="true">
                 <img src="images/pants.png" alt="Stellar Pants">
                 <h3>Stellar Pants</h3>
-                <p>150 SAR</p>
-                <button type="button" class="btn btn-primary" onclick="addToCart('Stellar Pants',150,event)">Add to Cart</button>
+                <p>
+                    <span class="old-price">150 SAR</span>
+                    <span class="discount-text">20% OFF</span>
+                    <span class="new-price">120 SAR</span>
+                </p>
+                <p class="preorder-tag">Preorders available now</p>
+                <button type="button" class="btn btn-primary" onclick="addToCart('Stellar Pants',120,event)">Add to Cart</button>
             </article>
 
             <!-- Hoodie COMING SOON -->
@@ -1005,7 +1037,7 @@
         <div id="detailInfo">
             <h2 id="detailName"></h2>
             <div id="detailPrice"></div>
-            <div class="detail-tag">Selling out fast! Grab yours today.</div>
+            <div class="detail-tag" id="detailTag"></div>
 
             <div class="detail-section-title">Choose your size</div>
             <div class="size-options" id="sizeOptions">
@@ -1284,12 +1316,7 @@
                 const text = document.createElement("div");
                 text.innerHTML = `<strong>${prod.dataset.name}</strong>`;
 
-                if (!img) {
-                    // if no image (coming soon), just text
-                    li.appendChild(text);
-                } else {
-                    li.appendChild(text);
-                }
+                li.appendChild(text);
                 list.appendChild(li);
             }
         });
@@ -1388,11 +1415,12 @@
     const productData = {
         p1: {
             name: "Stellar Pants",
-            price: 150,
+            price: 120, // discounted price used in cart & email
             img: "images/pants.png",
             fit: "Relaxed, slightly tapered fit designed for all-day comfort.",
             material: "100% cotton, mid-weight, breathable and soft on skin.",
-            wash: "Machine wash cold with similar colours. Do not bleach. Tumble dry low or hang to dry. Iron inside out."
+            wash: "Machine wash cold with similar colours. Do not bleach. Tumble dry low or hang to dry. Iron inside out.",
+            tag: "Preorders available now (pants only)."
         }
         // p2,p3,p4 are coming soon & disabled, so no detail data needed
     };
@@ -1414,6 +1442,8 @@
         document.getElementById("detailFit").textContent = data.fit;
         document.getElementById("detailMaterial").textContent = data.material;
         document.getElementById("detailWash").textContent = data.wash;
+        document.getElementById("detailTag").textContent =
+            data.tag || "Selling out fast! Grab yours today.";
 
         document.querySelectorAll(".size-pill").forEach(pill => {
             pill.classList.remove("selected");
